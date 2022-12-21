@@ -1,38 +1,40 @@
-import React, { useEffect, useState } from 'react'
-
-import axios from 'axios'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import ProductForm from '../components/ProductForm';
 import ProductList from '../components/ProductList';
-const Main = (props) => {
-    const [products, setProducts] = useState(null);
+import { navigate } from '@reach/router';
+
+export default () => {
+    const [products, setProducts] = useState([]);
     const [loaded, setLoaded] = useState(false);
-    
-    useEffect(()=>{
+
+    useEffect(() => {
         axios.get('http://localhost:8000/api/product')
-            .then(res=>{
-                setProducts(res.data);
+            .then(res =>{ 
+                setProducts(res.data)
                 setLoaded(true);
-            })
-            .catch(err => console.error(err));
-    },[products]);
-    
+            });
+    }, [])
 
     const removeFromDom = productId => {
         setProducts(products.filter(product => product._id != productId));
     }
 
+    const createProduct = product => {
+        axios.post('http://localhost:8000/api/product', product)
+            .then(res=>{
+                setProducts([...products, res.data]);
+                navigate('/')
+            })
+    }
 
     return (
         <div>
-            <ProductForm></ProductForm>
+        
+            <ProductForm onSubmitProp={createProduct} inititle="" iniprice="0" inidescription=""/>
            <hr/>
-           <hr/>
-           {loaded && <ProductList products={products} removeFromDom={removeFromDom}></ProductList>}
-
-
+           {loaded && <ProductList removeFromDom={removeFromDom}/>}
         </div>
     )
 }
-    
-export default Main;
 
